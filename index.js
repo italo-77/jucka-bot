@@ -5,13 +5,16 @@ const axios = require('axios');
 const cron = require('node-cron');
 const os = require('os');
 
-
-// (Opcional) OpenAI API para o módulo 5
-const { Configuration, OpenAIApi } = require('openai');
-const openai = new OpenAIApi(new Configuration({ apiKey: process.env.OPEN_AI_KEY }));
-
-const app = express();
-const bot = new Telegraf(process.env.TELEGRAM_TOKEN);
+// Verifica se a chave da OpenAI está presente
+if (!process.env.OPEN_AI_KEY) {
+  console.warn('⚠️ OPEN_AI_KEY não definida no .env. A API da OpenAI não será inicializada.');
+} else {
+  const { Configuration, OpenAIApi } = require('openai');
+  const openai = new OpenAIApi(
+    new Configuration({
+      apiKey: process.env.OPEN_AI_KEY,
+    })
+  );
 
 // === CONFIGURAÇÕES ===
 const GITHUB_USER = 'italo-77';
