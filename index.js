@@ -5,10 +5,11 @@ const axios = require('axios');
 const cron = require('node-cron');
 const os = require('os');
 
-const { Configuration, OpenAIApi } = require('openai');
-const openai = new OpenAIApi(
-  new Configuration({ apiKey: process.env.OPENAIKEY })
-);
+const OpenAI = require('openai');
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAIKEY
+});
 
 const app = express();
 const bot = new Telegraf(process.env.TELEGRAM_TOKEN);
@@ -231,6 +232,13 @@ function escaparMarkdownV2(texto) {
     .replace(/[_*[\]()~`>#+=|{}.!\\-]/g, (char) => `\\${char}`);
 }
 
+// ==MELHORIAS E RESUMOS COM IA
+const OpenAI = require('openai');
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAIKEY
+});
+
 // === /melhorias COM IA ===
 bot.command('melhorias', async (ctx) => {
   ctx.reply('🔍 Buscando melhorias com IA...');
@@ -239,17 +247,23 @@ bot.command('melhorias', async (ctx) => {
       `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/README.md`
     );
 
-    const resposta = await openai.createChatCompletion({
+    const resposta = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
-        { role: 'system', content: 'Você é um engenheiro de software experiente em sugerir melhorias para projetos.' },
-        { role: 'user', content: `Sugira melhorias técnicas para este README.md:\n\n${data}` }
+        {
+          role: 'system',
+          content: 'Você é um engenheiro de software experiente em sugerir melhorias para projetos.'
+        },
+        {
+          role: 'user',
+          content: `Sugira melhorias técnicas para este README.md:\n\n${data}`
+        }
       ],
       temperature: 0.6,
       max_tokens: 500
     });
 
-    const sugestoes = resposta.data.choices[0].message.content;
+    const sugestoes = resposta.choices[0].message.content;
     ctx.replyWithMarkdown(`🛠 *Sugestões de melhoria:*\n\n${sugestoes}`);
   } catch (err) {
     console.error('Erro ao buscar melhorias:', err.message);
@@ -264,17 +278,23 @@ bot.command('resumoai', async (ctx) => {
       `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/README.md`
     );
 
-    const resposta = await openai.createChatCompletion({
+    const resposta = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
-        { role: 'system', content: 'Você é um especialista DevOps que resume documentação de projetos.' },
-        { role: 'user', content: `Resuma tecnicamente este README.md:\n\n${data}` }
+        {
+          role: 'system',
+          content: 'Você é um especialista DevOps que resume documentação de projetos.'
+        },
+        {
+          role: 'user',
+          content: `Resuma tecnicamente este README.md:\n\n${data}`
+        }
       ],
       temperature: 0.7,
       max_tokens: 500
     });
 
-    const resumo = resposta.data.choices[0].message.content;
+    const resumo = resposta.choices[0].message.content;
     ctx.replyWithMarkdown(`🧾 *Resumo técnico:*\n\n${resumo}`);
   } catch (err) {
     console.error('Erro em /resumoai:', err.message);
