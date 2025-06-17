@@ -330,5 +330,3 @@ app.post('/webhook/github', express.json(), (req, res) => {
 
   res.status(200).send('ok');
 });
-
-bot.launch();
