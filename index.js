@@ -9,14 +9,17 @@ let openai = null;
 
 if (process.env.OPEN_AI_KEY) {
   const { Configuration, OpenAIApi } = require('openai');
-    const configuration = new Configuration({ apiKey: process.env.OPEN_AI_KEY });
-      openai = new OpenAIApi(configuration);
-      } else {
-        console.warn('⚠️ OPEN_AI_KEY não definida. API OpenAI não será usada.');
-        }
+    const configuration = new Configuration({
+        apiKey: process.env.OPEN_AI_KEY,
+          });
+            openai = new OpenAIApi(configuration);
+              console.log('✅ OpenAI inicializado com sucesso!');
+              } else {
+                console.warn('⚠️ OPEN_AI_KEY não definida. API da OpenAI não será usada.');
+                }
 
-        const app = express();
-        const bot = new Telegraf(process.env.TELEGRAM_TOKEN);
+                const app = express();
+                const bot = new Telegraf(process.env.TELEGRAM_TOKEN);
 
 // === CONFIGURAÇÕES ===
 const GITHUB_USER = 'italo-77';
