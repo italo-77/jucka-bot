@@ -232,13 +232,6 @@ function escaparMarkdownV2(texto) {
     .replace(/[_*[\]()~`>#+=|{}.!\\-]/g, (char) => `\\${char}`);
 }
 
-// ==MELHORIAS E RESUMOS COM IA
-const OpenAI = require('openai');
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAIKEY
-});
-
 // === /melhorias COM IA ===
 bot.command('melhorias', async (ctx) => {
   ctx.reply('🔍 Buscando melhorias com IA...');
