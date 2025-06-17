@@ -5,21 +5,13 @@ const axios = require('axios');
 const cron = require('node-cron');
 const os = require('os');
 
-let openai = null;
 
-if (process.env.OPEN_AI_KEY) {
-  const { Configuration, OpenAIApi } = require('openai');
-    const configuration = new Configuration({
-        apiKey: process.env.OPEN_AI_KEY,
-          });
-            openai = new OpenAIApi(configuration);
-              console.log('✅ OpenAI inicializado com sucesso!');
-              } else {
-                console.warn('⚠️ OPEN_AI_KEY não definida. API da OpenAI não será usada.');
-                }
+// (Opcional) OpenAI API para o módulo 5
+const { Configuration, OpenAIApi } = require('openai');
+const openai = new OpenAIApi(new Configuration({ apiKey: process.env.OPEN_AI_KEY }));
 
-                const app = express();
-                const bot = new Telegraf(process.env.TELEGRAM_TOKEN);
+const app = express();
+const bot = new Telegraf(process.env.TELEGRAM_TOKEN);
 
 // === CONFIGURAÇÕES ===
 const GITHUB_USER = 'italo-77';
@@ -27,21 +19,28 @@ const GITHUB_REPO = 'projeto-blog';
 const ADMIN_ID = 7135330595; // Substitua pelo ID real
 const START_TIME = new Date();
 
-
 // PRS ABERTOS NO REPOSITÓRIO
 bot.command('pullrequests', async (ctx) => {
   try {
-    const { data } = await axios.get(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/pulls`);
+    const axiosInstance = axios.create({
+      headers: {
+        Authorization: `token ${process.env.GITHUB_TOKEN}`
+      }
+    });
+
+    const { data } = await axiosInstance.get(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/pulls`);
+
     if (data.length === 0) return ctx.reply('✅ Nenhum pull request aberto no momento.');
 
     const resposta = data.map(pr =>
       `🔀 *${pr.title}*\n👤 ${pr.user.login}\n📅 ${new Date(pr.created_at).toLocaleDateString('pt-BR')}\n🔗 ${pr.html_url}`
     ).join('\n\n');
 
-    ctx.reply(`📂 *Pull Requests Abertos:*\n\n${resposta}`, { parse_mode: 'Markdown' });
+    ctx.reply(`📂 *Pull Requests Abertos:*\n\n${resposta}`, { parse_mode: 'MarkdownV2' });
+
   } catch (err) {
     console.error('Erro ao buscar PRs:', err.message);
-    ctx.reply('⚠️ Não foi possível obter os PRs.');
+    ctx.reply('⚠️ Erro ao buscar PRs.');
   }
 });
 
@@ -105,7 +104,7 @@ bot.command('uptime', (ctx) => {
 
 // SIMULA OU ACIONA O DEPLOY
 bot.command('deploy', (ctx) => {
-  if (ctx.from.id !== ADMIN_ID) return ctx.reply('🔐 Apenas administradores.');
+  if (!ctx.from || ctx.from.id !== ADMIN_ID) return ctx.reply('🔐 Apenas administradores.');
 
   ctx.reply('🚀 Iniciando processo de deploy...\n(Obs: Aqui você pode acoplar uma chamada a API de CI/CD, como o GitHub Dispatch ou Webhook)');
 });
@@ -135,6 +134,11 @@ cron.schedule('0 9 * * 1-5', async () => {
 });
 
 // WEBHOOK
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🌐 Servidor Express ouvindo na porta ${PORT}`);
+});
+
 app.post('/webhook/github', express.json(), (req, res) => {
   const event = req.headers['x-github-event'];
   const payload = req.body;
@@ -147,16 +151,16 @@ app.post('/webhook/github', express.json(), (req, res) => {
     );
   }
 
-  if (event === 'push') {
-    const commits = payload.commits.map(commit => `• "${commit.message}" por ${commit.author.name}`).join('\n');
-    bot.telegram.sendMessage(
-      ADMIN_ID,
-      `🚀 *Push detectado no repositório ${payload.repository.name}*\n📦 Branch: ${payload.ref.replace('refs/heads/', '')}\n${commits}`,
-      { parse_mode: 'Markdown' }
-    );
-  }
+if (event === 'push') {
+  const commits = payload.commits.map(commit => `• "${commit.message}" por ${commit.author.name}`).join('\n');
+  bot.telegram.sendMessage(
+    ADMIN_ID,
+    `📦 Novo *push* com ${payload.commits.length} commit(s):\n\n${commits}`,
+    { parse_mode: 'Markdown' }
+  );
+}
 
-  res.sendStatus(200);
+  res.status(200).send('ok');
 });
 
 // MENU PRINCIPAL
@@ -170,7 +174,11 @@ bot.command('painel', (ctx) => {
   });
 });
 
-// STATUS BUILD, TEMPO DE EXECUÇÃO
+// Webhook do Telegram (fora do webhook do GitHub)
+bot.telegram.setWebhook('https://jucka-bot.onrender.com/bot' + process.env.TELEGRAM_TOKEN);
+app.use(bot.webhookCallback('/bot' + process.env.TELEGRAM_TOKEN));
+
+// MENU CI/CD
 bot.action('painel_ci', (ctx) => {
   ctx.answerCbQuery();
   ctx.reply('⚙️ *Painel CI/CD*', {
@@ -183,7 +191,7 @@ bot.action('painel_ci', (ctx) => {
   });
 });
 
-// MENU REPO: COMMITS, PRS, ISSUIS, CONTRIBUIÇÃO
+// MENU REPOSITÓRIO
 bot.action('painel_repo', (ctx) => {
   ctx.answerCbQuery();
   ctx.reply('📁 *Painel do Repositório*', {
@@ -212,10 +220,100 @@ bot.action('painel_admin', (ctx) => {
   });
 });
 
-// GERA UM RESUMO TÉCNICO DO HEADME
-bot.command('resumoai', async (ctx) => {
-  ctx.reply('📖 Lendo README e gerando resumo com IA...');
+// DISPARAR COMANDOS EXISTENTES COMO SE O USUÁRIO TIVESSE DIGITADO
 
+bot.action('buildtime', async (ctx) => {
+  ctx.answerCbQuery();
+  ctx.message.text = '/buildtime';
+  await bot.handleUpdate(ctx.update);
+});
+
+bot.action('pullrequests', async (ctx) => {
+  ctx.answerCbQuery();
+  ctx.message.text = '/pullrequests';
+  await bot.handleUpdate(ctx.update);
+});
+
+bot.action('issues', async (ctx) => {
+  ctx.answerCbQuery();
+  ctx.message.text = '/issues';
+  await bot.handleUpdate(ctx.update);
+});
+
+bot.action('contributors', async (ctx) => {
+  ctx.answerCbQuery();
+  ctx.message.text = '/contributors';
+  await bot.handleUpdate(ctx.update);
+});
+
+bot.action('uptime', async (ctx) => {
+  ctx.answerCbQuery();
+  ctx.message.text = '/uptime';
+  await bot.handleUpdate(ctx.update);
+});
+
+bot.action('deploy', async (ctx) => {
+  ctx.answerCbQuery();
+  ctx.message.text = '/deploy';
+  await bot.handleUpdate(ctx.update);
+});
+
+bot.action('agendar', async (ctx) => {
+  ctx.answerCbQuery();
+  ctx.message.text = '/agendar';
+  await bot.handleUpdate(ctx.update);
+});
+
+// Função opcional para escapar caracteres do Markdown (se quiser usar em respostas formatadas)
+function escaparMarkdownV2(texto) {
+  return texto
+    .replace(/_/g, '\\_')
+    .replace(/\*/g, '\\*')
+    .replace(//g, '\')
+    .replace(//g, '\')
+    .replace(//g, '\')
+    .replace(//g, '\')
+    .replace(/~/g, '\\~')
+    .replace(/`/g, '\\`')
+    .replace(/>/g, '\\>')
+    .replace(/#/g, '\\#')
+    .replace(/\+/g, '\\+')
+    .replace(/-/g, '\\-')
+    .replace(/=/g, '\\=')
+    .replace(/\|/g, '\\|')
+    .replace(/\{/g, '\\{')
+    .replace(/\}/g, '\\}')
+    .replace(/\./g, '\\.')
+    .replace(/!/g, '\\!');
+}
+
+// COMANDO /melhorias
+bot.command('melhorias', async (ctx) => {
+  ctx.reply('🔍 Buscando melhorias com IA...');
+  try {
+    const { data } = await axios.get(`https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/README.md`);
+    
+    const resposta = await openai.createChatCompletion({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        { role: 'system', content: 'Você é um engenheiro de software experiente em sugerir melhorias para projetos.' },
+        { role: 'user', content: `Sugira melhorias técnicas para este README.md:\n\n${data}` }
+      ],
+      temperature: 0.6,
+      max_tokens: 500
+    });
+
+    const sugestoes = resposta.data.choices[0].message.content;
+    ctx.reply(`🛠 *Sugestões de melhoria:*\n\n${sugestoes}`, { parse_mode: 'Markdown' });
+
+  } catch (err) {
+    console.error('Erro ao buscar melhorias:', err.message);
+    ctx.reply('⚠️ Erro ao sugerir melhorias com IA.');
+  }
+});
+
+// COMANDO /resumoai
+bot.command('resumoai', async (ctx) => {
   try {
     const { data } = await axios.get(`https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/README.md`);
 
@@ -231,63 +329,10 @@ bot.command('resumoai', async (ctx) => {
 
     const resumo = resposta.data.choices[0].message.content;
     ctx.reply(`🧾 *Resumo técnico:*\n\n${resumo}`, { parse_mode: 'Markdown' });
+
   } catch (err) {
     console.error('Erro em /resumoai:', err.message);
     ctx.reply('⚠️ Erro ao gerar resumo com IA.');
   }
 });
-
-
-// MELHORIAS
-function escaparMarkdownV2(texto) {
-  return texto
-    .replace(/_/g, '\\_')
-    .replace(/\*/g, '\\*')
-    .replace(/\[/g, '\\[')
-    .replace(/\]/g, '\\]')
-    .replace(/\(/g, '\\(')
-    .replace(/\)/g, '\\)')
-    .replace(/~/g, '\\~')
-    .replace(/`/g, '\\`')
-    .replace(/>/g, '\\>')
-    .replace(/#/g, '\\#')
-    .replace(/\+/g, '\\+')
-    .replace(/-/g, '\\-')
-    .replace(/=/g, '\\=')
-    .replace(/\|/g, '\\|')
-    .replace(/\{/g, '\\{')
-    .replace(/\}/g, '\\}')
-    .replace(/\./g, '\\.')
-    .replace(/!/g, '\\!');
-}
-
-bot.command('melhorias', async (ctx) => {
-  ctx.reply('🔍 Buscando melhorias com IA...');
-
-  try {
-    const { data } = await axios.get(`https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/README.md`);
-
-    const resposta = await openai.createChatCompletion({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        { role: 'system', content: 'Você é um engenheiro de software experiente. Seu trabalho é revisar repositórios e sugerir melhorias técnicas.' },
-        { role: 'user', content: `Sugira melhorias e boas práticas para este repositório com base no README:\n\n${data}` }
-      ],
-      temperature: 0.7,
-      max_tokens: 600
-    });
-
-    const sugestoes = resposta.data.choices[0].message.content;
-    const textoSeguro = escaparMarkdownV2(sugestoes); // <- uso correto aqui
-
-    ctx.reply(`💡 *Sugestões de melhoria:*\n\n${textoSeguro}`, {
-      parse_mode: 'MarkdownV2'
-    });
-
-  } catch (err) {
-    console.error('Erro em /melhorias:', err.message);
-    ctx.reply('⚠️ Erro ao gerar sugestões de melhorias com IA.');
-  }
-});
-
-bot.action('buildtime', ctx => ctx.telegram.sendMessage(ctx.chat.id, '/buildtime'));
+bot.launch();
