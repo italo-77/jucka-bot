@@ -5,16 +5,18 @@ const axios = require('axios');
 const cron = require('node-cron');
 const os = require('os');
 
-// Verifica se a chave da OpenAI está presente
-if (!process.env.OPEN_AI_KEY) {
-  console.warn('⚠️ OPEN_AI_KEY não definida no .env. A API da OpenAI não será inicializada.');
-} else {
+let openai = null;
+
+if (process.env.OPEN_AI_KEY) {
   const { Configuration, OpenAIApi } = require('openai');
-  const openai = new OpenAIApi(
-    new Configuration({
-      apiKey: process.env.OPEN_AI_KEY,
-    })
-  );
+    const configuration = new Configuration({ apiKey: process.env.OPEN_AI_KEY });
+      openai = new OpenAIApi(configuration);
+      } else {
+        console.warn('⚠️ OPEN_AI_KEY não definida. API OpenAI não será usada.');
+        }
+
+        const app = express();
+        const bot = new Telegraf(process.env.TELEGRAM_TOKEN);
 
 // === CONFIGURAÇÕES ===
 const GITHUB_USER = 'italo-77';
