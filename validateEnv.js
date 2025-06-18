@@ -1,5 +1,7 @@
-// validateEnv.js
+// validate = require('fs');
+const path = require('path');
 
+// ✅ Verificação de variáveis de ambiente
 const requiredVars = [
   'TELEGRAM_TOKEN',
   'GITHUB_TOKEN',
@@ -24,7 +26,23 @@ if (isNaN(adminId)) {
   hasError = true;
 }
 
+// ✅ Verificação de diretórios e arquivos essenciais
+const pathsToCheck = [
+  './handlers',
+  './services/sugestoesFirebase.js',
+  './webhooks/githubWebhook.js',
+  './jobs/dailySummary.js'
+];
+
+pathsToCheck.forEach((relativePath) => {
+  const fullPath = path.join(__dirname, relativePath);
+  if (!fs.existsSync(fullPath)) {
+    console.error(`❌ Caminho não encontrado: ${relativePath}`);
+    hasError = true;
+  }
+});
+
 if (hasError) {
-  console.error('🚫 Falha na validação das variáveis de ambiente. Encerrando a aplicação.');
+  console.error('\n🚫 Falha na validação de ambiente e estrutura. Encerrando aplicação.');
   process.exit(1);
 }
