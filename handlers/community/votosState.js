@@ -1,0 +1,1 @@
+module.exports = new Map(); // usado por /votacao e /resultado
