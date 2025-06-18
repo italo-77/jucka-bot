@@ -25,7 +25,7 @@ function loadHandlers(dir) {
   });
 }
 
-const { listarSugestoes } = require('../services/sugestoesFirebase');
+const { listarSugestoes } = require('./services/sugestoesFirebase');
 
 bot.on('inline_query', async (ctx) => {
   const query = ctx.inlineQuery.query;
