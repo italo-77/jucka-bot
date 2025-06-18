@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./validateEnv');
 const express = require('express');
 const { Telegraf } = require('telegraf');
 const app = express();
