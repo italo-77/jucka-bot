@@ -1,6 +1,6 @@
 const cron = require('node-cron');
 const axios = require('axios');
-const config = require('./config/config');
+const config = require('../config/config');
 const supabase = require('../services/supabase'); // 👈 Import do Supabase
 
 // Verificação defensiva
