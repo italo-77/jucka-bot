@@ -1,5 +1,5 @@
 const ai = require('./openai');
-const { protegerAdmin } = require('./middlewares/auth');
+const { protegerAdmin } = require('../middlewares/auth');
 
 module.exports = (bot) => {
   bot.command('resumoai', protegerAdmin(async (ctx) => {
