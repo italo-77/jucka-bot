@@ -1,0 +1,18 @@
+# Ignora variáveis de ambiente
+.env
+
+# Ignora dependências
+node_modules/
+
+# Ignora arquivos de log e temporários
+logs/
+*.log
+*.tmp
+
+# Ignora editor configs (VSCode, etc)
+.vscode/
+*.swp
+
+# Ignora arquivos de build
+dist/
+build/
