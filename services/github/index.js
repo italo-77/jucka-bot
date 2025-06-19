@@ -1,14 +1,14 @@
-// services/github/index.js
-const pulls = require('./pulls');
-const builds = require('./builds');
-const issues = require('./issues');
-const commits = require('./commits');
-const contributors = require('./contributors');
+const { listPullRequests } = require('../../services/github/pullUtils');
+const { buildTime, statusWorkflow } = require('../../services/github/buildUtils');
+const { listIssues } = require('../../services/github/issuesUtils');
+const { lastCommit } = require('../../services/github/commitsUtils');
+const { topContributors } = require('../../services/github/contributorsUtils');
 
-module.exports = (bot, github) => {
-  pulls(bot, github);
-  builds(bot, github);
-  issues(bot, github);
-  commits(bot, github);
-  contributors(bot, github);
+module.exports = (bot) => {
+  bot.command('pullrequests', listPullRequests);
+  bot.command('buildtime', buildTime);
+  bot.command('status', statusWorkflow);
+  bot.command('issues', listIssues);
+  bot.command('ultimocommit', lastCommit);
+  bot.command('contributors', topContributors);
 };
