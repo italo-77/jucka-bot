@@ -1,6 +1,6 @@
 const { isAdmin } = require('../../middlewares/auth');
 const { iniciarAgenda } = require('../../services/agendamento');
-const { gerarResumoDoDia } = require('../../services/resumosIA'); // exemplo
+const { gerarResumoDoDia } = require('../../services/resumosIA');
 
 module.exports = (bot) => {
   bot.command('agendar', async (ctx) => {

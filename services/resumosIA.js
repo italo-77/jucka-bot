@@ -1,4 +1,4 @@
-const ai = require('../../services/openai');
+const ai = require('./openai');
 const { protegerAdmin } = require('../middleware/auth');
 
 module.exports = (bot) => {
