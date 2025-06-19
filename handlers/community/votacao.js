@@ -1,4 +1,4 @@
-const votos = new Map(); // memória simples. Podemos salvar no Firebase depois
+const votos = new Map();
 
 module.exports = (bot) => {
   bot.command('votacao', async (ctx) => {
@@ -20,10 +20,6 @@ module.exports = (bot) => {
 
   bot.on('callback_query', async (ctx) => {
     const data = ctx.callbackQuery.data;
-
-    if (!data.startsWith('voto:')) return;
-    const escolha = parseInt(data.split(':')[1]);
-
     const chatId = ctx.chat.id;
     const userId = ctx.from.id;
     const votoChat = votos.get(chatId);

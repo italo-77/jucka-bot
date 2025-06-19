@@ -1,4 +1,4 @@
-const votos = require('./votosState'); // Exporta/compartilha o objeto votos de forma modular
+const votos = require('../../votosState'); // Exporta/compartilha o objeto votos de forma modular
 
 module.exports = (bot) => {
   bot.command('resultado', async (ctx) => {
