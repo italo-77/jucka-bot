@@ -91,4 +91,7 @@ app.listen(PORT, () => {
 });
 
 const comandos = require('./setup/commands');
-bot.telegram.setMyCommands(comandos);
+
+bot.telegram.setMyCommands(comandos)
+  .then(() => console.log('✅ Comandos do bot registrados via webhook'))
+  .catch(err => console.error('❌ Erro ao registrar comandos:', err.message));
