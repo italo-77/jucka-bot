@@ -10,7 +10,6 @@ const auth = {
 
 // services/github/builds.js
 module.exports = (bot) => {
-  const { buildTime, statusWorkflow } = require('./buildUtils');
   bot.command('builds', buildTime);
   bot.command('status', statusWorkflow);
 };
