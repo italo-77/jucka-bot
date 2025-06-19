@@ -18,7 +18,7 @@ const requiredEnv = [
 ];
 
 const githubHandlers = require('./services/github');
-githubHandlers(bot, github);
+githubHandlers(bot);
 
 const missing = requiredEnv.filter((key) => !process.env[key]);
 
