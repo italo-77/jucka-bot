@@ -1,8 +1,8 @@
-const { listPullRequests } = require('../../services/github/pullUtils');
-const { buildTime, statusWorkflow } = require('../../services/github/buildUtils');
-const { listIssues } = require('../../services/github/issuesUtils');
-const { lastCommit } = require('../../services/github/commitsUtils');
-const { topContributors } = require('../../services/github/contributorsUtils');
+const { listPullRequests } = require('./pullUtils');
+const { buildTime, statusWorkflow } = require('./buildUtils');
+const { listIssues } = require('./issuesUtils');
+const { lastCommit } = require('./commitsUtils');
+const { topContributors } = require('./contributorsUtils');
 
 module.exports = (bot) => {
   bot.command('pullrequests', listPullRequests);
