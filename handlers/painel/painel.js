@@ -1,10 +1,8 @@
-bot.start((ctx) => {
+module.exports = (bot) => {
+  bot.start((ctx) => {
   ctx.reply('👋 Bem-vindo! Abertura do painel...');
   bot.handleUpdate({ message: { ...ctx.message, text: '/painel' } });
 });
-
-module.exports = (bot) => {
-  // Comando /painel com teclado interativo
   bot.command('painel', (ctx) => {
     ctx.reply('📋 *Painel de Comandos Disponíveis:*', {
       parse_mode: 'Markdown',
