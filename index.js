@@ -90,5 +90,5 @@ app.listen(PORT, () => {
   console.log(`🌐 Servidor rodando na porta ${PORT}`);
 });
 
-const comandos = require('./commands');
+const comandos = require('./setup/commands');
 bot.telegram.setMyCommands(comandos);
