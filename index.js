@@ -16,7 +16,7 @@ const requiredEnv = [
   'SUPABASE_URL',
   'SUPABASE_ANON_KEY'
 ];
-const github = require('./services/github/api');
+
 const githubHandlers = require('./services/github');
 githubHandlers(bot, github);
 
