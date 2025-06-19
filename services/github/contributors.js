@@ -5,7 +5,7 @@ const auth = {
   headers: { Authorization: `token ${config.GITHUB_TOKEN}` }
 };
 
-exports.contributors = async (ctx) => {
+const contributors = async (ctx) => {
   try {
     const { data } = await axios.get(
       `https://api.github.com/repos/${config.GITHUB_USER}/${config.GITHUB_REPO}/contributors`,
@@ -22,3 +22,9 @@ exports.contributors = async (ctx) => {
     ctx.reply('⚠️ Não foi possível buscar contribuidores.');
   }
 };
+
+module.exports = (bot) => {
+  bot.command('contributors', contributors);
+};
+
+module.exports.contributors = contributors;

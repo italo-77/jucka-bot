@@ -1,3 +1,4 @@
+// services/github/pulls.js
 const axios = require('axios');
 const config = require('../../config/config');
 
@@ -5,7 +6,7 @@ const auth = {
   headers: { Authorization: `token ${config.GITHUB_TOKEN}` }
 };
 
-exports.pullRequests = async (ctx) => {
+const pullRequests = async (ctx) => {
   try {
     const { data } = await axios.get(
       `https://api.github.com/repos/${config.GITHUB_USER}/${config.GITHUB_REPO}/pulls`,
@@ -24,3 +25,11 @@ exports.pullRequests = async (ctx) => {
     ctx.reply('⚠️ Erro ao buscar PRs.');
   }
 };
+
+// Registra o comando no bot
+module.exports = (bot) => {
+  bot.command('pullrequests', pullRequests);
+};
+
+// Exporta a função para reuso, se necessário
+module.exports.pullRequests = pullRequests;

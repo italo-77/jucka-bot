@@ -1,3 +1,4 @@
+// services/github/commits.js
 const axios = require('axios');
 const config = require('../../config/config');
 
@@ -5,7 +6,7 @@ const auth = {
   headers: { Authorization: `token ${config.GITHUB_TOKEN}` }
 };
 
-exports.commits = async (ctx) => {
+const commits = async (ctx) => {
   try {
     const { data } = await axios.get(
       `https://api.github.com/repos/${config.GITHUB_USER}/${config.GITHUB_REPO}/commits`,
@@ -38,3 +39,11 @@ exports.commits = async (ctx) => {
     ctx.reply('⚠️ Não foi possível buscar os commits.');
   }
 };
+
+// Registra o comando no bot
+module.exports = (bot) => {
+  bot.command('commits', commits);
+};
+
+// Se quiser usar a função manualmente em outro lugar:
+module.exports.commits = commits;

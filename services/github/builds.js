@@ -8,6 +8,13 @@ const auth = {
   }
 };
 
+// services/github/builds.js
+module.exports = (bot) => {
+  const { buildTime, statusWorkflow } = require('./buildUtils');
+  bot.command('builds', buildTime);
+  bot.command('status', statusWorkflow);
+};
+
 exports.buildTime = async (ctx) => {
   try {
     const { data } = await axios.get(
