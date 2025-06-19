@@ -1,5 +1,5 @@
 const axios = require('axios');
-const config = require('./config/config');
+const config = require('../config/config');
 
 module.exports.dispararDeploy = async () => {
   const resposta = await axios.post(config.DEPLOY_WEBHOOK_URL, {
