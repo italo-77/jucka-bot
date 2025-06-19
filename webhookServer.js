@@ -1,5 +1,3 @@
-const logger = require('./utils/logger');
-
 app.listen(PORT, () => {
   log.success(`🌐 Webhook ouvindo na porta ${PORT}`);
 });

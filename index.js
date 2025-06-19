@@ -77,9 +77,6 @@ bot.on('inline_query', async (ctx) => {
 
 loadHandlers(handlersPath);
 
-// Webhook
-require('./webhooks/githubWebhook')(app, bot);
-
 // Agendamentos
 require('./jobs/dailySummary')(bot);
 
