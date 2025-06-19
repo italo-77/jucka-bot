@@ -1,6 +1,6 @@
 const ai = require('../../services/openai');
 const axios = require('axios');
-const config = require('../config/config');
+const config = require('../../config/config');
 const { protegerAdmin } = require('../middlewares/auth');
 
 module.exports = (bot) => {
